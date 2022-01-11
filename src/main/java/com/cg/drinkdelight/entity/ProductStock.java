@@ -2,6 +2,7 @@ package com.cg.drinkdelight.entity;
 
 import java.sql.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -14,16 +15,24 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 public class ProductStock {
 	@Id
 	@GeneratedValue
+	@Column(name = "prod_id")
 	private int pId;
+	@Column(name = "prod_name")
 	private String pName;
+	@Column(name = "prod_price")
 	private double pPrice;
+	@Column(name = "prod_quantity")
 	private int pQuantity;
+	@Column(name = "prod_exitDate")
 	@JsonFormat(pattern = "dd-MM-yyyy", timezone = "Asia/Calcutta")
 	private Date exitDate;
+	@Column(name = "prod_mfDate")
 	@JsonFormat(pattern = "dd-MM-yyyy", timezone = "Asia/Calcutta")
 	private Date mfDate;
+	@Column(name = "prod_expDate")
 	@JsonFormat(pattern = "dd-MM-yyyy", timezone = "Asia/Calcutta")
 	private Date expDate;
+	@Column(name = "prod_deliveryDate")
 	@JsonFormat(pattern = "dd-MM-yyyy", timezone = "Asia/Calcutta")
 	private Date pDeliveryDate;
 

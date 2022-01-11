@@ -39,6 +39,19 @@ public class RawMaterialStock {
 	public RawMaterialStock() {
 	}
 
+	public RawMaterialStock(int id, String name, double unitPrice, int quantity, Date processDate, Date mfgDate,
+			Date expiryDate, Date deliveryDate) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.unitPrice = unitPrice;
+		this.quantity = quantity;
+		this.processDate = processDate;
+		this.mfgDate = mfgDate;
+		this.expiryDate = expiryDate;
+		this.deliveryDate = deliveryDate;
+	}
+
 	public int getId() {
 		return id;
 	}

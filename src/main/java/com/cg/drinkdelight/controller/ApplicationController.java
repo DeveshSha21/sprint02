@@ -3,6 +3,8 @@ package com.cg.drinkdelight.controller;
 import java.sql.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cg.drinkdelight.dto.UserDetailsDTO;
 import com.cg.drinkdelight.entity.ProductStock;
 import com.cg.drinkdelight.entity.RawMaterialStock;
+import com.cg.drinkdelight.entity.UserDetails;
 import com.cg.drinkdelight.service.ApplicationService;
+import com.cg.drinkdelight.service.CustomerService;
 
 @RestController
 @RequestMapping("/DrinkAndDelight")
@@ -27,13 +33,13 @@ public class ApplicationController {
 	@Autowired
 	public ApplicationService service;
 
-//	@Autowired
-//	private ICustomerRegister cRegister;
+	@Autowired
+	private CustomerService cRegister;
 
 	@GetMapping("/raw_material/by/id/{rmId}")
-	public ResponseEntity<RawMaterialStock> trackRawMaterialOrder(@PathVariable("rmId") Integer productId) {
-		System.out.println("cntrlr fetch productId: " + productId);
-		RawMaterialStock material = service.trackRawMaterialOrder(productId);
+	public ResponseEntity<RawMaterialStock> trackRawMaterialOrder(@PathVariable("rmId") Integer id) {
+		System.out.println("cntrlr fetch productId: " + id);
+		RawMaterialStock material = service.trackRawMaterialOrder(id);
 		return new ResponseEntity<RawMaterialStock>(material, HttpStatus.OK);
 	}
 
@@ -44,18 +50,18 @@ public class ApplicationController {
 	}
 
 	@GetMapping("/raw_material/setDate/{rmId}/{processdate}")
-	public ResponseEntity<RawMaterialStock> setProcessDate(@PathVariable("rmId") Integer productId,
+	public ResponseEntity<RawMaterialStock> setProcessDate(@PathVariable("rmId") Integer id,
 			@PathVariable("processdate") Date processDate) {
-		System.out.println("cntrlr fetch productId: " + productId);
-		RawMaterialStock material = service.setProcessDate(productId, processDate);
+		System.out.println("cntrlr fetch productId: " + id);
+		RawMaterialStock material = service.setProcessDate(id, processDate);
 		return new ResponseEntity<RawMaterialStock>(material, HttpStatus.OK);
 	}
 
 	@GetMapping("/raw_material/setDate/{rmId}/{mfdate}/{expdate}")
-	public ResponseEntity<RawMaterialStock> updateMfExpDate(@PathVariable("rmId") Integer productId,
-			@PathVariable("mfdate") Date mfDate, @PathVariable("expdate") Date expDate) {
-		System.out.println("cntrlr fetch productId: " + productId);
-		RawMaterialStock material = service.updateMfExpDate(productId, mfDate, expDate);
+	public ResponseEntity<RawMaterialStock> updateMfExpDate(@PathVariable("rmId") Integer id,
+			@PathVariable("mfdate") Date mfgDate, @PathVariable("expdate") Date expiryDate) {
+		System.out.println("cntrlr fetch productId: " + id);
+		RawMaterialStock material = service.updateMfExpDate(id, mfgDate, expiryDate);
 		return new ResponseEntity<RawMaterialStock>(material, HttpStatus.OK);
 	}
 
@@ -88,19 +94,17 @@ public class ApplicationController {
 		return new ResponseEntity<List<ProductStock>>(prod, HttpStatus.OK);
 	}
 
-	@GetMapping("/product/delivery_status/{pid}/{status}")
-	public ResponseEntity<ProductStock> updateDeliveryStatusOfProduct(@Valid @PathVariable("pid") Integer pId,
-			@PathVariable("PdeliveryDate") Date pDeliveryDate) {
+	@GetMapping("/product/delivery_date/{pid}/{pDeliveryDate}")
+	public ResponseEntity<ProductStock> updateDeliveryStatusOfProduct(@PathVariable("pid") Integer pId, @PathVariable("pDeliveryDate") Date pDeliveryDate) {
 		System.out.println("cntrlr fetch productId: " + pId);
 		ProductStock prod = service.updatePDeliveryDate(pId, pDeliveryDate);
 		return new ResponseEntity<ProductStock>(prod, HttpStatus.OK);
 	}
 
-	@GetMapping("/raw_material/delivery_status/{rmId}/{status}")
-	public ResponseEntity<RawMaterialStock> updateDeliveryStatusOfRawMaterial(
-			@Valid @PathVariable("rmId") Integer productId, @PathVariable("deliveryDate") Date deliveryDate) {
-		System.out.println("cntrlr fetch productId: " + productId);
-		RawMaterialStock rm = service.updateRmDeliveryDate(productId, deliveryDate);
+	@GetMapping("/raw_material/delivery_date/{rmId}/{deliveryDate}")
+	public ResponseEntity<RawMaterialStock> updateDeliveryStatusOfRawMaterial(@PathVariable("rmId") Integer id, @PathVariable("deliveryDate") Date deliveryDate) {
+		System.out.println("cntrlr fetch productId: " + id);
+		RawMaterialStock rm = service.updateRmDeliveryDate(id, deliveryDate);
 		return new ResponseEntity<RawMaterialStock>(rm, HttpStatus.OK);
 	}
 
@@ -116,6 +120,37 @@ public class ApplicationController {
 		ProductStock prod1 = service.addProduct(prod);
 
 		return new ResponseEntity<ProductStock>(prod1, HttpStatus.OK);
+	}
+	
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("/login")
+	public String login(@RequestBody UserDetailsDTO userDetails, HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		UserDetails uDetails = cRegister.findByName(userDetails);
+		session.setAttribute("username", uDetails.getUsername());
+		session.setAttribute("role", uDetails.getUserRole());
+		session.setAttribute("custid", uDetails.getCustid());
+		return "Login Successful.......Welcome " + uDetails.getUsername() + " ->" + uDetails.getUserRole();
+	}
+	
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("/logout")
+	public String logout(@RequestBody UserDetailsDTO userDetails, HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		if (userDetails.getUsername().equals(session.getAttribute("username"))) {
+			session.invalidate();
+			return "You have successfully logged out " + userDetails.getUsername();
+		}
+		return "Not logged off";
+	}
+	
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("/login/register")
+	public String register(@RequestBody UserDetailsDTO userDetails, HttpServletRequest request) {
+		UserDetails uDetails = new UserDetails(userDetails.getUsername(), userDetails.getPassword(), "User");
+		uDetails = cRegister.register(uDetails);
+		return "Registration successful with Username : " + uDetails.getUsername() + " Role-> "
+				+ uDetails.getUserRole();
 	}
 
 }

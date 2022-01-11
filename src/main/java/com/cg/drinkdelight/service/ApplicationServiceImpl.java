@@ -125,7 +125,7 @@ public class ApplicationServiceImpl implements ApplicationService{
 	}
 
 	@Override
-	public ProductStock updatePDeliveryDate(@Valid Integer pId, Date pDeliveryDate) {
+	public ProductStock updatePDeliveryDate(Integer pId, Date pDeliveryDate) {
 		Optional<ProductStock> op=pDao.findById(pId);
 		ProductStock prod=null;
 		if(!op.isPresent())
@@ -135,23 +135,23 @@ public class ApplicationServiceImpl implements ApplicationService{
 			prod=op.get();
 			prod.setpDeliveryDate(pDeliveryDate);
 			pDao.save(prod);
-			System.out.println(" Manufacturing Date, Expiry Date  is inserted");
+			System.out.println(" Delivery Date  is inserted");
 		}
 		return prod;
 	}
 
 	@Override
-	public RawMaterialStock updateRmDeliveryDate(@Valid Integer productId, Date deliveryDate) {
-		Optional<RawMaterialStock> op=mDao.findById(productId);
+	public RawMaterialStock updateRmDeliveryDate(@Valid Integer id, Date deliveryDate) {
+		Optional<RawMaterialStock> op=mDao.findById(id);
 		RawMaterialStock rm=null;
 		if(!op.isPresent())
-			throw new RawMaterialException("No Raw Material Found For Product id: "+productId);
+			throw new RawMaterialException("No Raw Material Found For Product id: "+id);
 		else
 		{
 			rm=op.get();
 			rm.setDeliveryDate(deliveryDate);
 			mDao.save(rm);
-			System.out.println("Delivery Status updated for product id:"+productId);
+			System.out.println("Delivery Status updated for product id:"+id);
 		}
 		return rm;
 	}
@@ -181,6 +181,10 @@ public class ApplicationServiceImpl implements ApplicationService{
 			rm1.setName(rm.getName());
 			rm1.setQuantity(rm.getQuantity());
 			rm1.setUnitPrice(rm.getUnitPrice());
+			rm1.setDeliveryDate(rm.getDeliveryDate());
+			rm1.setExpiryDate(rm.getExpiryDate());
+			rm1.setMfgDate(rm.getMfgDate());
+			rm1.setProcessDate(rm.getProcessDate());
 			mDao.save(rm1);
 		
 		return rm1;
@@ -193,6 +197,10 @@ public class ApplicationServiceImpl implements ApplicationService{
 		prod1.setpName(prod.getpName());
 		prod1.setpQuantity(prod.getpQuantity());
 		prod1.setpPrice(prod.getpPrice());
+		prod1.setExitDate(prod.getExitDate());
+		prod1.setExpDate(prod.getExpDate());
+		prod1.setMfDate(prod.getMfDate());
+		prod1.setpDeliveryDate(prod.getpDeliveryDate());
 		pDao.save(prod1);
 		return prod1;
 	}
